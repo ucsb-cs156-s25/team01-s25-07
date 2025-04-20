@@ -27,6 +27,7 @@ import jakarta.validation.Valid;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.List;
 
 /**
  * This is a REST controller for Articles
@@ -97,21 +98,13 @@ public class ArticlesController extends ApiController {
         article.setExplanation(explanation);
         article.setEmail(email);
         
-        // Handle both date formats: with or without time component
-        LocalDateTime parsedDate;
+        // Use the helper method to parse the date
         try {
-            parsedDate = LocalDateTime.parse(dateAdded);
+            article.setDateAdded(parseDateTime(dateAdded));
         } catch (DateTimeParseException e) {
-            try {
-                // If the date doesn't have a time component, add T00:00:00
-                parsedDate = LocalDateTime.parse(dateAdded + "T00:00:00");
-            } catch (DateTimeParseException ex) {
-                // If both parsing attempts fail, throw a ResponseStatusException with BAD_REQUEST
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, 
-                    "Invalid date format. Expected format: yyyy-MM-dd or yyyy-MM-ddTHH:mm:ss");
-            }
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, 
+                "Invalid date format. Expected format: yyyy-MM-dd or yyyy-MM-ddTHH:mm:ss");
         }
-        article.setDateAdded(parsedDate);
 
         Article savedArticle = articlesRepository.save(article);
 
@@ -162,5 +155,46 @@ public class ArticlesController extends ApiController {
         articlesRepository.save(article);
 
         return article;
+    }
+
+    /**
+     * Get articles within a date range
+     * 
+     * @param startDate the start date in ISO format (yyyy-MM-dd or yyyy-MM-ddTHH:mm:ss)
+     * @param endDate the end date in ISO format (yyyy-MM-dd or yyyy-MM-ddTHH:mm:ss)
+     * @return a list of Articles within the date range
+     */
+    @Operation(summary= "Get articles within a date range")
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping("/bydate")
+    public List<Article> getByDateRange(
+            @Parameter(name="startDate") @RequestParam String startDate,
+            @Parameter(name="endDate") @RequestParam String endDate) {
+        
+        LocalDateTime parsedStartDate;
+        LocalDateTime parsedEndDate;
+        
+        try {
+            parsedStartDate = parseDateTime(startDate);
+            parsedEndDate = parseDateTime(endDate);
+        } catch (DateTimeParseException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, 
+                "Invalid date format. Expected format: yyyy-MM-dd or yyyy-MM-ddTHH:mm:ss");
+        }
+        
+        List<Article> articles = articlesRepository.findByDateAddedBetween(parsedStartDate, parsedEndDate);
+        return articles;
+    }
+    
+    /**
+     * Helper method to parse date strings with or without time component
+     */
+    private LocalDateTime parseDateTime(String dateString) {
+        try {
+            return LocalDateTime.parse(dateString);
+        } catch (DateTimeParseException e) {
+            // If the date doesn't have a time component, add T00:00:00
+            return LocalDateTime.parse(dateString + "T00:00:00");
+        }
     }
 }

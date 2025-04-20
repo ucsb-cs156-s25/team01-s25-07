@@ -358,4 +358,75 @@ public class ArticlesControllerTests extends ControllerTestCase {
                         .with(csrf()))
                 .andExpect(status().isBadRequest()); // Expecting a 400 Bad Request
     }
+
+    @WithMockUser(roles = { "USER" })
+    @Test
+    public void test_get_articles_by_date_range() throws Exception {
+        // arrange
+        LocalDateTime startDate = LocalDateTime.parse("2022-01-01T00:00:00");
+        LocalDateTime endDate = LocalDateTime.parse("2022-01-31T23:59:59");
+
+        Article article1 = Article.builder()
+                .title("Using AI to automate testing")
+                .url("https://example.org/article1")
+                .explanation("An article about AI testing")
+                .email("phtcon@ucsb.edu")
+                .dateAdded(LocalDateTime.parse("2022-01-03T00:00:00"))
+                .build();
+
+        Article article2 = Article.builder()
+                .title("LLMs for generating test cases")
+                .url("https://example.org/article2")
+                .explanation("An article about LLMs and testing")
+                .email("phtcon@ucsb.edu")
+                .dateAdded(LocalDateTime.parse("2022-01-15T00:00:00"))
+                .build();
+
+        ArrayList<Article> expectedArticles = new ArrayList<>();
+        expectedArticles.addAll(Arrays.asList(article1, article2));
+
+        when(articlesRepository.findByDateAddedBetween(eq(startDate), eq(endDate))).thenReturn(expectedArticles);
+
+        // act
+        MvcResult response = mockMvc.perform(
+                get("/api/articles/bydate?startDate=2022-01-01&endDate=2022-01-31T23:59:59"))
+                .andExpect(status().isOk()).andReturn();
+
+        // assert
+        verify(articlesRepository, times(1)).findByDateAddedBetween(eq(startDate), eq(endDate));
+        String expectedJson = mapper.writeValueAsString(expectedArticles);
+        String responseString = response.getResponse().getContentAsString();
+        assertEquals(expectedJson, responseString);
+    }
+
+    @WithMockUser(roles = { "USER" })
+    @Test
+    public void test_get_articles_by_date_range_invalid_date_format() throws Exception {
+        // act & assert
+        mockMvc.perform(
+                get("/api/articles/bydate?startDate=01/01/2022&endDate=01/31/2022"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void logged_out_users_cannot_get_by_date_range() throws Exception {
+        mockMvc.perform(get("/api/articles/bydate?startDate=2022-01-01&endDate=2022-01-31"))
+                .andExpect(status().is(403)); // logged out users can't access
+    }
+
+    @WithMockUser(roles = { "USER" })
+    @Test
+    public void test_helper_method_parseDateTime() throws Exception {
+        // This test indirectly tests the parseDateTime method through the API endpoints
+        
+        // Test with full datetime format
+        mockMvc.perform(
+                get("/api/articles/bydate?startDate=2022-01-01T00:00:00&endDate=2022-01-31T23:59:59"))
+                .andExpect(status().isOk());
+        
+        // Test with date-only format
+        mockMvc.perform(
+                get("/api/articles/bydate?startDate=2022-01-01&endDate=2022-01-31"))
+                .andExpect(status().isOk());
+    }
 }
