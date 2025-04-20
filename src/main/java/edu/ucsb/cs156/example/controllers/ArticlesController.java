@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import jakarta.validation.Valid;
 
@@ -104,8 +106,9 @@ public class ArticlesController extends ApiController {
                 // If the date doesn't have a time component, add T00:00:00
                 parsedDate = LocalDateTime.parse(dateAdded + "T00:00:00");
             } catch (DateTimeParseException ex) {
-                // If both parsing attempts fail, throw a more descriptive exception
-                throw new IllegalArgumentException("Invalid date format. Expected format: yyyy-MM-dd or yyyy-MM-ddTHH:mm:ss");
+                // If both parsing attempts fail, throw a ResponseStatusException with BAD_REQUEST
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, 
+                    "Invalid date format. Expected format: yyyy-MM-dd or yyyy-MM-ddTHH:mm:ss");
             }
         }
         article.setDateAdded(parsedDate);
