@@ -24,6 +24,7 @@ import jakarta.validation.Valid;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
 /**
  * This is a REST controller for Articles
@@ -93,7 +94,16 @@ public class ArticlesController extends ApiController {
         article.setUrl(url);
         article.setExplanation(explanation);
         article.setEmail(email);
-        article.setDateAdded(LocalDateTime.parse(dateAdded));
+        
+        // Handle both date formats: with or without time component
+        LocalDateTime parsedDate;
+        try {
+            parsedDate = LocalDateTime.parse(dateAdded);
+        } catch (DateTimeParseException e) {
+            // If the date doesn't have a time component, add T00:00:00
+            parsedDate = LocalDateTime.parse(dateAdded + "T00:00:00");
+        }
+        article.setDateAdded(parsedDate);
 
         Article savedArticle = articlesRepository.save(article);
 

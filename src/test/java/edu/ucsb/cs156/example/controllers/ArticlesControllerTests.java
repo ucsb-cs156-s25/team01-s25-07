@@ -184,7 +184,7 @@ public class ArticlesControllerTests extends ControllerTestCase {
 
         // act
         MvcResult response = mockMvc.perform(
-                post("/api/articles/post?title=Using AI to automate testing&url=https://example.org/article1&explanation=An article about AI testing&email=phtcon@ucsb.edu&dateAdded=2022-01-03")
+                post("/api/articles/post?title=Using AI to automate testing&url=https://example.org/article1&explanation=An article about AI testing&email=phtcon@ucsb.edu&dateAdded=2022-01-03T00:00:00")
                         .with(csrf()))
                 .andExpect(status().isOk()).andReturn();
 
