@@ -460,4 +460,48 @@ public class ArticlesControllerTests extends ControllerTestCase {
                 get("/api/articles/bydate?startDate=2022-01-01&endDate=2022-01-31"))
                 .andExpect(status().isOk());
     }
+
+    @WithMockUser(roles = { "ADMIN", "USER" })
+    @Test
+    public void admin_can_edit_article_email_field() throws Exception {
+        // arrange
+        Article articleOrig = Article.builder()
+                .title("Using AI to automate testing")
+                .url("https://example.org/article1")
+                .explanation("An article about AI testing")
+                .email("original@ucsb.edu")
+                .dateAdded(LocalDateTime.parse("2022-01-03T00:00:00"))
+                .build();
+
+        Article articleEdited = Article.builder()
+                .title("Using AI to automate testing")
+                .url("https://example.org/article1")
+                .explanation("An article about AI testing")
+                .email("updated@ucsb.edu") // Only changing the email field
+                .dateAdded(LocalDateTime.parse("2022-01-03T00:00:00"))
+                .build();
+
+        String requestBody = mapper.writeValueAsString(articleEdited);
+
+        when(articlesRepository.findById(eq(67L))).thenReturn(Optional.of(articleOrig));
+
+        // act
+        MvcResult response = mockMvc.perform(
+                put("/api/articles?id=67")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .characterEncoding("utf-8")
+                        .content(requestBody)
+                        .with(csrf()))
+                .andExpect(status().isOk()).andReturn();
+
+        // assert
+        verify(articlesRepository, times(1)).findById(67L);
+        verify(articlesRepository, times(1)).save(articleEdited);
+        
+        // Specifically verify that the email field was updated
+        assertEquals("updated@ucsb.edu", articleEdited.getEmail());
+        
+        String responseString = response.getResponse().getContentAsString();
+        assertEquals(requestBody, responseString);
+    }
 }
