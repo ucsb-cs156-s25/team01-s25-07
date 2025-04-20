@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import jakarta.validation.Valid;
 
@@ -33,8 +35,8 @@ import java.time.format.DateTimeParseException;
 @Tag(name = &quot;Articles&quot;)
 @RequestMapping(&quot;/api/articles&quot;)
 @RestController
-<span class="fc" id="L36">@Slf4j</span>
-<span class="fc" id="L37">public class ArticlesController extends ApiController {</span>
+<span class="fc" id="L38">@Slf4j</span>
+<span class="fc" id="L39">public class ArticlesController extends ApiController {</span>
 
     @Autowired
     ArticlesRepository articlesRepository;
@@ -48,8 +50,8 @@ import java.time.format.DateTimeParseException;
     @PreAuthorize(&quot;hasRole('ROLE_USER')&quot;)
     @GetMapping(&quot;/all&quot;)
     public Iterable&lt;Article&gt; allArticles() {
-<span class="fc" id="L51">        Iterable&lt;Article&gt; articles = articlesRepository.findAll();</span>
-<span class="fc" id="L52">        return articles;</span>
+<span class="fc" id="L53">        Iterable&lt;Article&gt; articles = articlesRepository.findAll();</span>
+<span class="fc" id="L54">        return articles;</span>
     }
 
     /**
@@ -63,10 +65,10 @@ import java.time.format.DateTimeParseException;
     @GetMapping(&quot;&quot;)
     public Article getById(
             @Parameter(name=&quot;id&quot;) @RequestParam Long id) {
-<span class="fc" id="L66">        Article article = articlesRepository.findById(id)</span>
-<span class="fc" id="L67">                .orElseThrow(() -&gt; new EntityNotFoundException(Article.class, id));</span>
+<span class="fc" id="L68">        Article article = articlesRepository.findById(id)</span>
+<span class="fc" id="L69">                .orElseThrow(() -&gt; new EntityNotFoundException(Article.class, id));</span>
 
-<span class="fc" id="L69">        return article;</span>
+<span class="fc" id="L71">        return article;</span>
     }
 
     /**
@@ -89,25 +91,31 @@ import java.time.format.DateTimeParseException;
             @Parameter(name=&quot;email&quot;) @RequestParam String email,
             @Parameter(name=&quot;dateAdded&quot;) @RequestParam String dateAdded) {
 
-<span class="fc" id="L92">        Article article = new Article();</span>
-<span class="fc" id="L93">        article.setTitle(title);</span>
-<span class="fc" id="L94">        article.setUrl(url);</span>
-<span class="fc" id="L95">        article.setExplanation(explanation);</span>
-<span class="fc" id="L96">        article.setEmail(email);</span>
+<span class="fc" id="L94">        Article article = new Article();</span>
+<span class="fc" id="L95">        article.setTitle(title);</span>
+<span class="fc" id="L96">        article.setUrl(url);</span>
+<span class="fc" id="L97">        article.setExplanation(explanation);</span>
+<span class="fc" id="L98">        article.setEmail(email);</span>
         
         // Handle both date formats: with or without time component
         LocalDateTime parsedDate;
         try {
-<span class="fc" id="L101">            parsedDate = LocalDateTime.parse(dateAdded);</span>
-<span class="nc" id="L102">        } catch (DateTimeParseException e) {</span>
-            // If the date doesn't have a time component, add T00:00:00
-<span class="nc" id="L104">            parsedDate = LocalDateTime.parse(dateAdded + &quot;T00:00:00&quot;);</span>
-<span class="fc" id="L105">        }</span>
-<span class="fc" id="L106">        article.setDateAdded(parsedDate);</span>
+<span class="fc" id="L103">            parsedDate = LocalDateTime.parse(dateAdded);</span>
+<span class="fc" id="L104">        } catch (DateTimeParseException e) {</span>
+            try {
+                // If the date doesn't have a time component, add T00:00:00
+<span class="fc" id="L107">                parsedDate = LocalDateTime.parse(dateAdded + &quot;T00:00:00&quot;);</span>
+<span class="nc" id="L108">            } catch (DateTimeParseException ex) {</span>
+                // If both parsing attempts fail, throw a ResponseStatusException with BAD_REQUEST
+<span class="nc" id="L110">                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, </span>
+                    &quot;Invalid date format. Expected format: yyyy-MM-dd or yyyy-MM-ddTHH:mm:ss&quot;);
+<span class="fc" id="L112">            }</span>
+<span class="fc" id="L113">        }</span>
+<span class="fc" id="L114">        article.setDateAdded(parsedDate);</span>
 
-<span class="fc" id="L108">        Article savedArticle = articlesRepository.save(article);</span>
+<span class="fc" id="L116">        Article savedArticle = articlesRepository.save(article);</span>
 
-<span class="fc" id="L110">        return savedArticle;</span>
+<span class="fc" id="L118">        return savedArticle;</span>
     }
 
     /**
@@ -121,11 +129,11 @@ import java.time.format.DateTimeParseException;
     @DeleteMapping(&quot;&quot;)
     public Object deleteArticle(
             @Parameter(name=&quot;id&quot;) @RequestParam Long id) {
-<span class="fc" id="L124">        Article article = articlesRepository.findById(id)</span>
-<span class="fc" id="L125">                .orElseThrow(() -&gt; new EntityNotFoundException(Article.class, id));</span>
+<span class="fc" id="L132">        Article article = articlesRepository.findById(id)</span>
+<span class="fc" id="L133">                .orElseThrow(() -&gt; new EntityNotFoundException(Article.class, id));</span>
 
-<span class="fc" id="L127">        articlesRepository.delete(article);</span>
-<span class="fc" id="L128">        return genericMessage(&quot;Article with id %s deleted&quot;.formatted(id));</span>
+<span class="fc" id="L135">        articlesRepository.delete(article);</span>
+<span class="fc" id="L136">        return genericMessage(&quot;Article with id %s deleted&quot;.formatted(id));</span>
     }
 
     /**
@@ -142,18 +150,18 @@ import java.time.format.DateTimeParseException;
             @Parameter(name=&quot;id&quot;) @RequestParam Long id,
             @RequestBody @Valid Article incoming) {
 
-<span class="fc" id="L145">        Article article = articlesRepository.findById(id)</span>
-<span class="fc" id="L146">                .orElseThrow(() -&gt; new EntityNotFoundException(Article.class, id));</span>
+<span class="fc" id="L153">        Article article = articlesRepository.findById(id)</span>
+<span class="fc" id="L154">                .orElseThrow(() -&gt; new EntityNotFoundException(Article.class, id));</span>
 
-<span class="fc" id="L148">        article.setTitle(incoming.getTitle());</span>
-<span class="fc" id="L149">        article.setUrl(incoming.getUrl());</span>
-<span class="fc" id="L150">        article.setExplanation(incoming.getExplanation());</span>
-<span class="fc" id="L151">        article.setEmail(incoming.getEmail());</span>
-<span class="fc" id="L152">        article.setDateAdded(incoming.getDateAdded());</span>
+<span class="fc" id="L156">        article.setTitle(incoming.getTitle());</span>
+<span class="fc" id="L157">        article.setUrl(incoming.getUrl());</span>
+<span class="fc" id="L158">        article.setExplanation(incoming.getExplanation());</span>
+<span class="fc" id="L159">        article.setEmail(incoming.getEmail());</span>
+<span class="fc" id="L160">        article.setDateAdded(incoming.getDateAdded());</span>
 
-<span class="fc" id="L154">        articlesRepository.save(article);</span>
+<span class="fc" id="L162">        articlesRepository.save(article);</span>
 
-<span class="fc" id="L156">        return article;</span>
+<span class="fc" id="L164">        return article;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
