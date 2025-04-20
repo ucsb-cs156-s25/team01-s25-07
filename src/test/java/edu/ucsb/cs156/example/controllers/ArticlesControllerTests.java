@@ -345,4 +345,17 @@ public class ArticlesControllerTests extends ControllerTestCase {
         Map<String, Object> json = responseToJson(response);
         assertEquals("Article with id 67 not found", json.get("message"));
     }
+
+    @WithMockUser(roles = { "ADMIN", "USER" })
+    @Test
+    public void test_post_article_with_invalid_date_format() throws Exception {
+        // arrange
+        String invalidDateFormat = "2022/01/03"; // Using slashes instead of dashes
+        
+        // act & assert
+        mockMvc.perform(
+                post("/api/articles/post?title=Using AI to automate testing&url=https://example.org/article1&explanation=An article about AI testing&email=phtcon@ucsb.edu&dateAdded=" + invalidDateFormat)
+                        .with(csrf()))
+                .andExpect(status().isBadRequest()); // Expecting a 400 Bad Request
+    }
 }

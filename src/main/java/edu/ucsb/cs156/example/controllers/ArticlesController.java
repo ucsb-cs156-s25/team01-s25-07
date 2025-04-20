@@ -100,8 +100,13 @@ public class ArticlesController extends ApiController {
         try {
             parsedDate = LocalDateTime.parse(dateAdded);
         } catch (DateTimeParseException e) {
-            // If the date doesn't have a time component, add T00:00:00
-            parsedDate = LocalDateTime.parse(dateAdded + "T00:00:00");
+            try {
+                // If the date doesn't have a time component, add T00:00:00
+                parsedDate = LocalDateTime.parse(dateAdded + "T00:00:00");
+            } catch (DateTimeParseException ex) {
+                // If both parsing attempts fail, throw a more descriptive exception
+                throw new IllegalArgumentException("Invalid date format. Expected format: yyyy-MM-dd or yyyy-MM-ddTHH:mm:ss");
+            }
         }
         article.setDateAdded(parsedDate);
 
