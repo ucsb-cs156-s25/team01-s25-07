@@ -22,6 +22,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
 import java.util.Optional;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -89,7 +91,7 @@ public class ArticlesControllerTests extends ControllerTestCase {
                 .url("https://example.org/article1")
                 .explanation("An article about AI testing")
                 .email("phtcon@ucsb.edu")
-                .dateAdded("2022-01-03")
+                .dateAdded(LocalDateTime.parse("2022-01-03T00:00:00"))
                 .build();
 
         when(articlesRepository.findById(eq(7L))).thenReturn(Optional.of(article));
@@ -137,7 +139,7 @@ public class ArticlesControllerTests extends ControllerTestCase {
                 .url("https://example.org/article1")
                 .explanation("An article about AI testing")
                 .email("phtcon@ucsb.edu")
-                .dateAdded("2022-01-03")
+                .dateAdded(LocalDateTime.parse("2022-01-03T00:00:00"))
                 .build();
 
         Article article2 = Article.builder()
@@ -145,7 +147,7 @@ public class ArticlesControllerTests extends ControllerTestCase {
                 .url("https://example.org/article2")
                 .explanation("An article about LLMs and testing")
                 .email("phtcon@ucsb.edu")
-                .dateAdded("2022-03-11")
+                .dateAdded(LocalDateTime.parse("2022-03-11T00:00:00"))
                 .build();
 
         ArrayList<Article> expectedArticles = new ArrayList<>();
@@ -175,7 +177,7 @@ public class ArticlesControllerTests extends ControllerTestCase {
                 .url("https://example.org/article1")
                 .explanation("An article about AI testing")
                 .email("phtcon@ucsb.edu")
-                .dateAdded("2022-01-03")
+                .dateAdded(LocalDateTime.parse("2022-01-03T00:00:00"))
                 .build();
 
         when(articlesRepository.save(eq(article))).thenReturn(article);
@@ -203,7 +205,7 @@ public class ArticlesControllerTests extends ControllerTestCase {
                 .url("https://example.org/article1")
                 .explanation("An article about AI testing")
                 .email("phtcon@ucsb.edu")
-                .dateAdded("2022-01-03")
+                .dateAdded(LocalDateTime.parse("2022-01-03T00:00:00"))
                 .build();
 
         when(articlesRepository.findById(eq(15L))).thenReturn(Optional.of(article));
@@ -252,7 +254,7 @@ public class ArticlesControllerTests extends ControllerTestCase {
                 .url("https://example.org/article1")
                 .explanation("An article about AI testing")
                 .email("phtcon@ucsb.edu")
-                .dateAdded("2022-01-03")
+                .dateAdded(LocalDateTime.parse("2022-01-03T00:00:00"))
                 .build();
 
         Article articleEdited = Article.builder()
@@ -260,7 +262,7 @@ public class ArticlesControllerTests extends ControllerTestCase {
                 .url("https://example.org/article1-updated")
                 .explanation("An updated article about ML testing")
                 .email("phtcon@ucsb.edu")
-                .dateAdded("2022-01-04")
+                .dateAdded(LocalDateTime.parse("2022-01-04T00:00:00"))
                 .build();
 
         String requestBody = mapper.writeValueAsString(articleEdited);
@@ -293,7 +295,7 @@ public class ArticlesControllerTests extends ControllerTestCase {
                 .url("https://example.org/article1-updated")
                 .explanation("An updated article about ML testing")
                 .email("phtcon@ucsb.edu")
-                .dateAdded("2022-01-04")
+                .dateAdded(LocalDateTime.parse("2022-01-04T00:00:00"))
                 .build();
 
         String requestBody = mapper.writeValueAsString(articleEdited);
