@@ -363,7 +363,7 @@ public class ArticlesControllerTests extends ControllerTestCase {
     public void test_get_articles_by_date_range() throws Exception {
         // arrange
         LocalDateTime startDate = LocalDateTime.parse("2022-01-01T00:00:00");
-        LocalDateTime endDate = LocalDateTime.parse("2022-01-31T23:59:59");
+        LocalDateTime endDate = LocalDateTime.parse("2022-01-31T00:00:00");
         
         Article article1 = Article.builder()
                 .title("Article 1")
