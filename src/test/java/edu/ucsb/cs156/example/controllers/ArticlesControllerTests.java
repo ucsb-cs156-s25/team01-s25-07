@@ -197,6 +197,35 @@ public class ArticlesControllerTests extends ControllerTestCase {
 
     @WithMockUser(roles = { "ADMIN", "USER" })
     @Test
+    public void an_admin_user_can_post_a_new_article_with_date_only() throws Exception {
+        // arrange
+        LocalDateTime expectedDateTime = LocalDateTime.parse("2022-01-03T00:00:00");
+        
+        Article article = Article.builder()
+                .title("Using AI to automate testing")
+                .url("https://example.org/article1")
+                .explanation("An article about AI testing")
+                .email("phtcon@ucsb.edu")
+                .dateAdded(expectedDateTime)
+                .build();
+
+        when(articlesRepository.save(any(Article.class))).thenReturn(article);
+
+        // act
+        MvcResult response = mockMvc.perform(
+                post("/api/articles/post?title=Using AI to automate testing&url=https://example.org/article1&explanation=An article about AI testing&email=phtcon@ucsb.edu&dateAdded=2022-01-03")
+                        .with(csrf()))
+                .andExpect(status().isOk()).andReturn();
+
+        // assert
+        verify(articlesRepository, times(1)).save(any(Article.class));
+        String expectedJson = mapper.writeValueAsString(article);
+        String responseString = response.getResponse().getContentAsString();
+        assertEquals(expectedJson, responseString);
+    }
+
+    @WithMockUser(roles = { "ADMIN", "USER" })
+    @Test
     public void admin_can_delete_an_article() throws Exception {
         // arrange
 
