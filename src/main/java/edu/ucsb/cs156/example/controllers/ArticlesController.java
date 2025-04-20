@@ -22,6 +22,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 /**
  * This is a REST controller for Articles
  */
@@ -90,7 +93,7 @@ public class ArticlesController extends ApiController {
         article.setUrl(url);
         article.setExplanation(explanation);
         article.setEmail(email);
-        article.setDateAdded(dateAdded);
+        article.setDateAdded(LocalDateTime.parse(dateAdded));
 
         Article savedArticle = articlesRepository.save(article);
 

@@ -12,6 +12,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 /**
  * This is a JPA entity that represents an Article.
  * 
@@ -32,5 +34,5 @@ public class Article {
   private String url;
   private String explanation;
   private String email;
-  private String dateAdded;
+  private LocalDateTime dateAdded;
 }
