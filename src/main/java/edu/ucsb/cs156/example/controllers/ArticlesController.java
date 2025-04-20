@@ -9,7 +9,11 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,7 +23,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import jakarta.validation.Valid;
@@ -51,8 +54,7 @@ public class ArticlesController extends ApiController {
     @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping("/all")
     public Iterable<Article> allArticles() {
-        Iterable<Article> articles = articlesRepository.findAll();
-        return articles;
+        return articlesRepository.findAll();
     }
 
     /**
@@ -90,21 +92,25 @@ public class ArticlesController extends ApiController {
             @Parameter(name="url") @RequestParam String url,
             @Parameter(name="explanation") @RequestParam String explanation,
             @Parameter(name="email") @RequestParam String email,
-            @Parameter(name="dateAdded") @RequestParam String dateAdded) {
+            @Parameter(name="dateAdded") @RequestParam String dateAdded)
+            throws JsonProcessingException {
 
-        Article article = new Article();
-        article.setTitle(title);
-        article.setUrl(url);
-        article.setExplanation(explanation);
-        article.setEmail(email);
-        
-        // Use the helper method to parse the date
+        LocalDateTime dateTime;
         try {
-            article.setDateAdded(parseDateTime(dateAdded));
+            dateTime = parseDateTime(dateAdded);
         } catch (DateTimeParseException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, 
-                "Invalid date format. Expected format: yyyy-MM-dd or yyyy-MM-ddTHH:mm:ss");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid date format. Use ISO date format (YYYY-MM-DD) or ISO date-time format (YYYY-MM-DDThh:mm:ss)");
         }
+
+        log.info("dateAdded={}", dateTime);
+
+        Article article = Article.builder()
+                .title(title)
+                .url(url)
+                .explanation(explanation)
+                .email(email)
+                .dateAdded(dateTime)
+                .build();
 
         Article savedArticle = articlesRepository.save(article);
 
@@ -167,33 +173,30 @@ public class ArticlesController extends ApiController {
     @Operation(summary= "Get articles within a date range")
     @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping("/bydate")
-    public List<Article> getByDateRange(
+    public List<Article> getArticlesByDateRange(
             @Parameter(name="startDate") @RequestParam String startDate,
             @Parameter(name="endDate") @RequestParam String endDate) {
         
-        LocalDateTime parsedStartDate;
-        LocalDateTime parsedEndDate;
-        
+        LocalDateTime start, end;
         try {
-            parsedStartDate = parseDateTime(startDate);
-            parsedEndDate = parseDateTime(endDate);
+            start = parseDateTime(startDate);
+            end = parseDateTime(endDate);
         } catch (DateTimeParseException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, 
-                "Invalid date format. Expected format: yyyy-MM-dd or yyyy-MM-ddTHH:mm:ss");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid date format. Use ISO date format (YYYY-MM-DD) or ISO date-time format (YYYY-MM-DDThh:mm:ss)");
         }
         
-        List<Article> articles = articlesRepository.findByDateAddedBetween(parsedStartDate, parsedEndDate);
-        return articles;
+        return articlesRepository.findByDateAddedBetween(start, end);
     }
     
     /**
-     * Helper method to parse date strings with or without time component
+     * Helper method to parse date strings in either date-only or date-time format
      */
     private LocalDateTime parseDateTime(String dateString) {
-        try {
+        if (dateString.contains("T")) {
+            // Full date-time format
             return LocalDateTime.parse(dateString);
-        } catch (DateTimeParseException e) {
-            // If the date doesn't have a time component, add T00:00:00
+        } else {
+            // Date-only format, append T00:00:00 for midnight
             return LocalDateTime.parse(dateString + "T00:00:00");
         }
     }

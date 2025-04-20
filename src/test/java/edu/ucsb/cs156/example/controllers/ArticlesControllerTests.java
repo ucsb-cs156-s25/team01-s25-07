@@ -365,33 +365,65 @@ public class ArticlesControllerTests extends ControllerTestCase {
         // arrange
         LocalDateTime startDate = LocalDateTime.parse("2022-01-01T00:00:00");
         LocalDateTime endDate = LocalDateTime.parse("2022-01-31T23:59:59");
-
+        
         Article article1 = Article.builder()
-                .title("Using AI to automate testing")
-                .url("https://example.org/article1")
-                .explanation("An article about AI testing")
-                .email("phtcon@ucsb.edu")
-                .dateAdded(LocalDateTime.parse("2022-01-03T00:00:00"))
+                .title("Article 1")
+                .url("url1")
+                .explanation("explanation1")
+                .email("email1")
+                .dateAdded(LocalDateTime.parse("2022-01-05T00:00:00"))
                 .build();
-
+                
         Article article2 = Article.builder()
-                .title("LLMs for generating test cases")
-                .url("https://example.org/article2")
-                .explanation("An article about LLMs and testing")
-                .email("phtcon@ucsb.edu")
+                .title("Article 2")
+                .url("url2")
+                .explanation("explanation2")
+                .email("email2")
                 .dateAdded(LocalDateTime.parse("2022-01-15T00:00:00"))
                 .build();
-
+                
         ArrayList<Article> expectedArticles = new ArrayList<>();
         expectedArticles.addAll(Arrays.asList(article1, article2));
-
+        
         when(articlesRepository.findByDateAddedBetween(eq(startDate), eq(endDate))).thenReturn(expectedArticles);
-
-        // act
+        
+        // act & assert
         MvcResult response = mockMvc.perform(
-                get("/api/articles/bydate?startDate=2022-01-01&endDate=2022-01-31T23:59:59"))
+                get("/api/articles/bydate?startDate=2022-01-01&endDate=2022-01-31"))
                 .andExpect(status().isOk()).andReturn();
-
+                
+        // assert
+        verify(articlesRepository, times(1)).findByDateAddedBetween(eq(startDate), eq(endDate));
+        String expectedJson = mapper.writeValueAsString(expectedArticles);
+        String responseString = response.getResponse().getContentAsString();
+        assertEquals(expectedJson, responseString);
+    }
+    
+    @WithMockUser(roles = { "USER" })
+    @Test
+    public void test_get_articles_by_date_range_with_time() throws Exception {
+        // arrange
+        LocalDateTime startDate = LocalDateTime.parse("2022-01-01T10:00:00");
+        LocalDateTime endDate = LocalDateTime.parse("2022-01-31T14:00:00");
+        
+        Article article1 = Article.builder()
+                .title("Article 1")
+                .url("url1")
+                .explanation("explanation1")
+                .email("email1")
+                .dateAdded(LocalDateTime.parse("2022-01-05T12:00:00"))
+                .build();
+                
+        ArrayList<Article> expectedArticles = new ArrayList<>();
+        expectedArticles.add(article1);
+        
+        when(articlesRepository.findByDateAddedBetween(eq(startDate), eq(endDate))).thenReturn(expectedArticles);
+        
+        // act & assert
+        MvcResult response = mockMvc.perform(
+                get("/api/articles/bydate?startDate=2022-01-01T10:00:00&endDate=2022-01-31T14:00:00"))
+                .andExpect(status().isOk()).andReturn();
+                
         // assert
         verify(articlesRepository, times(1)).findByDateAddedBetween(eq(startDate), eq(endDate));
         String expectedJson = mapper.writeValueAsString(expectedArticles);
