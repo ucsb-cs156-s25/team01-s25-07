@@ -9,7 +9,11 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,7 +23,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import jakarta.validation.Valid;
@@ -36,8 +39,8 @@ import java.util.List;
 @Tag(name = &quot;Articles&quot;)
 @RequestMapping(&quot;/api/articles&quot;)
 @RestController
-<span class="fc" id="L39">@Slf4j</span>
-<span class="fc" id="L40">public class ArticlesController extends ApiController {</span>
+<span class="fc" id="L42">@Slf4j</span>
+<span class="fc" id="L43">public class ArticlesController extends ApiController {</span>
 
     @Autowired
     ArticlesRepository articlesRepository;
@@ -51,8 +54,7 @@ import java.util.List;
     @PreAuthorize(&quot;hasRole('ROLE_USER')&quot;)
     @GetMapping(&quot;/all&quot;)
     public Iterable&lt;Article&gt; allArticles() {
-<span class="fc" id="L54">        Iterable&lt;Article&gt; articles = articlesRepository.findAll();</span>
-<span class="fc" id="L55">        return articles;</span>
+<span class="fc" id="L57">        return articlesRepository.findAll();</span>
     }
 
     /**
@@ -66,10 +68,10 @@ import java.util.List;
     @GetMapping(&quot;&quot;)
     public Article getById(
             @Parameter(name=&quot;id&quot;) @RequestParam Long id) {
-<span class="fc" id="L69">        Article article = articlesRepository.findById(id)</span>
-<span class="fc" id="L70">                .orElseThrow(() -&gt; new EntityNotFoundException(Article.class, id));</span>
+<span class="fc" id="L71">        Article article = articlesRepository.findById(id)</span>
+<span class="fc" id="L72">                .orElseThrow(() -&gt; new EntityNotFoundException(Article.class, id));</span>
 
-<span class="fc" id="L72">        return article;</span>
+<span class="fc" id="L74">        return article;</span>
     }
 
     /**
@@ -90,25 +92,29 @@ import java.util.List;
             @Parameter(name=&quot;url&quot;) @RequestParam String url,
             @Parameter(name=&quot;explanation&quot;) @RequestParam String explanation,
             @Parameter(name=&quot;email&quot;) @RequestParam String email,
-            @Parameter(name=&quot;dateAdded&quot;) @RequestParam String dateAdded) {
+            @Parameter(name=&quot;dateAdded&quot;) @RequestParam String dateAdded)
+            throws JsonProcessingException {
 
-<span class="fc" id="L95">        Article article = new Article();</span>
-<span class="fc" id="L96">        article.setTitle(title);</span>
-<span class="fc" id="L97">        article.setUrl(url);</span>
-<span class="fc" id="L98">        article.setExplanation(explanation);</span>
-<span class="fc" id="L99">        article.setEmail(email);</span>
-        
-        // Use the helper method to parse the date
+        LocalDateTime dateTime;
         try {
-<span class="fc" id="L103">            article.setDateAdded(parseDateTime(dateAdded));</span>
-<span class="fc" id="L104">        } catch (DateTimeParseException e) {</span>
-<span class="fc" id="L105">            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, </span>
-                &quot;Invalid date format. Expected format: yyyy-MM-dd or yyyy-MM-ddTHH:mm:ss&quot;);
-<span class="fc" id="L107">        }</span>
+<span class="fc" id="L100">            dateTime = parseDateTime(dateAdded);</span>
+<span class="fc" id="L101">        } catch (DateTimeParseException e) {</span>
+<span class="fc" id="L102">            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, &quot;Invalid date format. Use ISO date format (YYYY-MM-DD) or ISO date-time format (YYYY-MM-DDThh:mm:ss)&quot;);</span>
+<span class="fc" id="L103">        }</span>
 
-<span class="fc" id="L109">        Article savedArticle = articlesRepository.save(article);</span>
+<span class="fc" id="L105">        log.info(&quot;dateAdded={}&quot;, dateTime);</span>
 
-<span class="fc" id="L111">        return savedArticle;</span>
+<span class="fc" id="L107">        Article article = Article.builder()</span>
+<span class="fc" id="L108">                .title(title)</span>
+<span class="fc" id="L109">                .url(url)</span>
+<span class="fc" id="L110">                .explanation(explanation)</span>
+<span class="fc" id="L111">                .email(email)</span>
+<span class="fc" id="L112">                .dateAdded(dateTime)</span>
+<span class="fc" id="L113">                .build();</span>
+
+<span class="fc" id="L115">        Article savedArticle = articlesRepository.save(article);</span>
+
+<span class="fc" id="L117">        return savedArticle;</span>
     }
 
     /**
@@ -122,11 +128,11 @@ import java.util.List;
     @DeleteMapping(&quot;&quot;)
     public Object deleteArticle(
             @Parameter(name=&quot;id&quot;) @RequestParam Long id) {
-<span class="fc" id="L125">        Article article = articlesRepository.findById(id)</span>
-<span class="fc" id="L126">                .orElseThrow(() -&gt; new EntityNotFoundException(Article.class, id));</span>
+<span class="fc" id="L131">        Article article = articlesRepository.findById(id)</span>
+<span class="fc" id="L132">                .orElseThrow(() -&gt; new EntityNotFoundException(Article.class, id));</span>
 
-<span class="fc" id="L128">        articlesRepository.delete(article);</span>
-<span class="fc" id="L129">        return genericMessage(&quot;Article with id %s deleted&quot;.formatted(id));</span>
+<span class="fc" id="L134">        articlesRepository.delete(article);</span>
+<span class="fc" id="L135">        return genericMessage(&quot;Article with id %s deleted&quot;.formatted(id));</span>
     }
 
     /**
@@ -143,18 +149,18 @@ import java.util.List;
             @Parameter(name=&quot;id&quot;) @RequestParam Long id,
             @RequestBody @Valid Article incoming) {
 
-<span class="fc" id="L146">        Article article = articlesRepository.findById(id)</span>
-<span class="fc" id="L147">                .orElseThrow(() -&gt; new EntityNotFoundException(Article.class, id));</span>
+<span class="fc" id="L152">        Article article = articlesRepository.findById(id)</span>
+<span class="fc" id="L153">                .orElseThrow(() -&gt; new EntityNotFoundException(Article.class, id));</span>
 
-<span class="fc" id="L149">        article.setTitle(incoming.getTitle());</span>
-<span class="fc" id="L150">        article.setUrl(incoming.getUrl());</span>
-<span class="fc" id="L151">        article.setExplanation(incoming.getExplanation());</span>
-<span class="fc" id="L152">        article.setEmail(incoming.getEmail());</span>
-<span class="fc" id="L153">        article.setDateAdded(incoming.getDateAdded());</span>
+<span class="fc" id="L155">        article.setTitle(incoming.getTitle());</span>
+<span class="fc" id="L156">        article.setUrl(incoming.getUrl());</span>
+<span class="fc" id="L157">        article.setExplanation(incoming.getExplanation());</span>
+<span class="fc" id="L158">        article.setEmail(incoming.getEmail());</span>
+<span class="fc" id="L159">        article.setDateAdded(incoming.getDateAdded());</span>
 
-<span class="fc" id="L155">        articlesRepository.save(article);</span>
+<span class="fc" id="L161">        articlesRepository.save(article);</span>
 
-<span class="fc" id="L157">        return article;</span>
+<span class="fc" id="L163">        return article;</span>
     }
 
     /**
@@ -167,34 +173,31 @@ import java.util.List;
     @Operation(summary= &quot;Get articles within a date range&quot;)
     @PreAuthorize(&quot;hasRole('ROLE_USER')&quot;)
     @GetMapping(&quot;/bydate&quot;)
-    public List&lt;Article&gt; getByDateRange(
+    public List&lt;Article&gt; getArticlesByDateRange(
             @Parameter(name=&quot;startDate&quot;) @RequestParam String startDate,
             @Parameter(name=&quot;endDate&quot;) @RequestParam String endDate) {
         
-        LocalDateTime parsedStartDate;
-        LocalDateTime parsedEndDate;
-        
+        LocalDateTime start, end;
         try {
-<span class="fc" id="L178">            parsedStartDate = parseDateTime(startDate);</span>
-<span class="fc" id="L179">            parsedEndDate = parseDateTime(endDate);</span>
-<span class="fc" id="L180">        } catch (DateTimeParseException e) {</span>
-<span class="fc" id="L181">            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, </span>
-                &quot;Invalid date format. Expected format: yyyy-MM-dd or yyyy-MM-ddTHH:mm:ss&quot;);
-<span class="fc" id="L183">        }</span>
+<span class="fc" id="L182">            start = parseDateTime(startDate);</span>
+<span class="fc" id="L183">            end = parseDateTime(endDate);</span>
+<span class="fc" id="L184">        } catch (DateTimeParseException e) {</span>
+<span class="fc" id="L185">            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, &quot;Invalid date format. Use ISO date format (YYYY-MM-DD) or ISO date-time format (YYYY-MM-DDThh:mm:ss)&quot;);</span>
+<span class="fc" id="L186">        }</span>
         
-<span class="fc" id="L185">        List&lt;Article&gt; articles = articlesRepository.findByDateAddedBetween(parsedStartDate, parsedEndDate);</span>
-<span class="fc" id="L186">        return articles;</span>
+<span class="fc" id="L188">        return articlesRepository.findByDateAddedBetween(start, end);</span>
     }
     
     /**
-     * Helper method to parse date strings with or without time component
+     * Helper method to parse date strings in either date-only or date-time format
      */
     private LocalDateTime parseDateTime(String dateString) {
-        try {
-<span class="fc" id="L194">            return LocalDateTime.parse(dateString);</span>
-<span class="fc" id="L195">        } catch (DateTimeParseException e) {</span>
-            // If the date doesn't have a time component, add T00:00:00
-<span class="fc" id="L197">            return LocalDateTime.parse(dateString + &quot;T00:00:00&quot;);</span>
+<span class="fc bfc" id="L195" title="All 2 branches covered.">        if (dateString.contains(&quot;T&quot;)) {</span>
+            // Full date-time format
+<span class="fc" id="L197">            return LocalDateTime.parse(dateString);</span>
+        } else {
+            // Date-only format, append T00:00:00 for midnight
+<span class="fc" id="L200">            return LocalDateTime.parse(dateString + &quot;T00:00:00&quot;);</span>
         }
     }
 }
