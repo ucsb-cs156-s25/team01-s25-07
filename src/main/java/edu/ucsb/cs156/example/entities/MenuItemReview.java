@@ -24,3 +24,4 @@ public class MenuItemReview {
     private int stars;
     private String comments;
   }
+  
