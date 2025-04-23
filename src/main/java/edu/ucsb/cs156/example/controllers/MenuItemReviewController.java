@@ -30,7 +30,7 @@ import jakarta.validation.Valid;
 import java.time.LocalDateTime;
 
 @Tag(name = "MenuItemReview")
-@RequestMapping("/api/menuitemreview")
+@RequestMapping("/api/menuitemreviews")
 @RestController
 @Slf4j
 public class MenuItemReviewController extends ApiController {

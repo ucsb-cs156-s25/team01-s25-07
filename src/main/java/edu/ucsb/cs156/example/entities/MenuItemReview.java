@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Entity(name = "menuitemreview")
+@Entity(name = "menu_item_reviews")
 public class MenuItemReview {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,5 +23,4 @@ public class MenuItemReview {
     private String reviewerEmail;
     private int stars;
     private String comments;
-  }
-  
+}
