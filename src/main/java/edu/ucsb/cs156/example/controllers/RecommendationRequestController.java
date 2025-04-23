@@ -27,7 +27,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
 
+
 import java.time.LocalDateTime;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * This is a REST controller for RecommendationRequest
@@ -97,24 +100,20 @@ public class RecommendationRequestController extends ApiController {
     }
 
     /**
-     * Update a single recommendation request
+     * Get a single date by id
      * 
-     * @param id       id of the recommendation request to update
-     * @param incoming the new recommendation request
-     * @return the updated recommendation request object
+     * @param id the id of the date
+     * @return a UCSBDate
      */
-    @Operation(summary = "Update a single recommendation request")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @PutMapping("")
-    public RecommendationRequest updateRecommendationRequest(
-            @Parameter(name = "id") @RequestParam Long id,
-            @RequestBody @Valid RecommendationRequest incoming) {
-
+    @Operation(summary= "Get a single date")
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping("")
+    public RecommendationRequest getById(
+            @Parameter(name="id") @RequestParam Long id) {
         RecommendationRequest recommendationRequest = recommendationrequestRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(RecommendationRequest.class, id));
 
-        recommendationrequestRepository.save(recommendationRequest);
-
         return recommendationRequest;
     }
+
 }
