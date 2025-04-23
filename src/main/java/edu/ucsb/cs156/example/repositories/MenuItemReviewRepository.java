@@ -7,9 +7,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface MenuItemReviewRepository extends CrudRepository<MenuItemReview, Long> {
-    Iterable<MenuItemReview> findByItemId(long itemId);
 
-    Iterable<MenuItemReview> findByReviewerEmail(String reviewerEmail);
-
-    Iterable<MenuItemReview> findByItemIdAndReviewerEmail(long itemId, String reviewerEmail);
 }
