@@ -174,7 +174,7 @@ public class HelpRequestControllerTests extends ControllerTestCase {
                 String responseString = response.getResponse().getContentAsString();
                 assertEquals(expectedJson, responseString);
         }
-        /* 
+        
         @WithMockUser(roles = { "ADMIN", "USER" })
         @Test
         public void an_admin_user_can_post_a_new_helprequest() throws Exception {
@@ -205,8 +205,6 @@ public class HelpRequestControllerTests extends ControllerTestCase {
                 String responseString = response.getResponse().getContentAsString();
                 assertEquals(expectedJson, responseString);
         }
-
-        */
 
         // @WithMockUser(roles = { "ADMIN", "USER" })
         // @Test
