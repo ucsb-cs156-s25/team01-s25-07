@@ -47,19 +47,19 @@
                   },
                   {
                     "column": {
-                      "name": "REQUESTEREMAIL",
+                      "name": "REQUESTER_EMAIL",
                       "type": "VARCHAR(255)"
                     }
                   },
                   {
                     "column": {
-                      "name": "TABLEORBREAKOUTROOM",
+                      "name": "TABLE_OR_BREAKOUT_ROOM",
                       "type": "VARCHAR(255)"
                     }
                   },
                   {
                     "column": {
-                      "name": "explanation",
+                      "name": "EXPLANATION",
                       "type": "VARCHAR(255)"
                     }
                   },
