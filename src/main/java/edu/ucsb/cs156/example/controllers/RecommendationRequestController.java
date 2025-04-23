@@ -37,8 +37,8 @@ import java.time.LocalDateTime;
 @RequestMapping("/api/recommendationrequest")
 @RestController
 @Slf4j
-public class RecommendationRequestController extends ApiController{
-    
+public class RecommendationRequestController extends ApiController {
+
     @Autowired
     RecommendationRequestRepository recommendationrequestRepository;
 
@@ -47,7 +47,7 @@ public class RecommendationRequestController extends ApiController{
      * 
      * @return an iterable of Recommendation Requests
      */
-    @Operation(summary= "List all recommendation requests")
+    @Operation(summary = "List all recommendation requests")
     @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping("/all")
     public Iterable<RecommendationRequest> allRecommendationRequests() {
@@ -55,28 +55,27 @@ public class RecommendationRequestController extends ApiController{
         return recommendationrequests;
     }
 
-
     /**
      * Create a new recommendation request
      * 
-     * @param requesterEmail  the requester's email
-     * @param professorEmail  the professor's email
-     * @param explanation     student explanations
-     * @param dateRequested   the date that student requests the recommendation
-     * @param dateNeeded      the date that student needs to recommendation
-     * @param done            whether the recommendation is submitted or not
+     * @param requesterEmail the requester's email
+     * @param professorEmail the professor's email
+     * @param explanation    student explanations
+     * @param dateRequested  the date that student requests the recommendation
+     * @param dateNeeded     the date that student needs to recommendation
+     * @param done           whether the recommendation is submitted or not
      * @return the saved recommendation request
      */
-    @Operation(summary= "Create a new recommendation request")
+    @Operation(summary = "Create a new recommendation request")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/post")
     public RecommendationRequest postRecommendationRequest(
-            @Parameter(name="requesterEmail") @RequestParam String requesterEmail,
-            @Parameter(name="professorEmail") @RequestParam String professorEmail,
-            @Parameter(name="explanation") @RequestParam String explanation,
-            @Parameter(name="dateRequested", description="date (in iso format, e.g. YYYY-mm-ddTHH:MM:SS; see https://en.wikipedia.org/wiki/ISO_8601)") @RequestParam("dateRequested") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dateRequested,
-            @Parameter(name="dateNeeded", description="date (in iso format, e.g. YYYY-mm-ddTHH:MM:SS; see https://en.wikipedia.org/wiki/ISO_8601)") @RequestParam("dateNeeded") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dateNeeded,
-            @Parameter(name="done") @RequestParam boolean done)
+            @Parameter(name = "requesterEmail") @RequestParam String requesterEmail,
+            @Parameter(name = "professorEmail") @RequestParam String professorEmail,
+            @Parameter(name = "explanation") @RequestParam String explanation,
+            @Parameter(name = "dateRequested", description = "date (in iso format, e.g. YYYY-mm-ddTHH:MM:SS; see https://en.wikipedia.org/wiki/ISO_8601)") @RequestParam("dateRequested") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dateRequested,
+            @Parameter(name = "dateNeeded", description = "date (in iso format, e.g. YYYY-mm-ddTHH:MM:SS; see https://en.wikipedia.org/wiki/ISO_8601)") @RequestParam("dateNeeded") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dateNeeded,
+            @Parameter(name = "done") @RequestParam boolean done)
             throws JsonProcessingException {
 
         // For an explanation of @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
@@ -95,5 +94,34 @@ public class RecommendationRequestController extends ApiController{
         RecommendationRequest savedRecommendationRequest = recommendationrequestRepository.save(recommendationRequest);
 
         return savedRecommendationRequest;
+    }
+
+    /**
+     * Update a single recommendation request
+     * 
+     * @param id       id of the recommendation request to update
+     * @param incoming the new recommendation request
+     * @return the updated recommendation request object
+     */
+    @Operation(summary = "Update a single recommendation request")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PutMapping("")
+    public RecommendationRequest updateRecommendationRequest(
+            @Parameter(name = "id") @RequestParam Long id,
+            @RequestBody @Valid RecommendationRequest incoming) {
+
+        RecommendationRequest recommendationRequest = recommendationrequestRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(RecommendationRequest.class, id));
+
+        // recommendationRequest.setProfessorEmail(incoming.getProfessorEmail());
+        // recommendationRequest.setRequesterEmail(incoming.getRequesterEmail());
+        // recommendationRequest.setExplanation(incoming.getExplanation());
+        // recommendationRequest.setDateRequested(incoming.getDateRequested());
+        // recommendationRequest.setDateNeeded(incoming.getDateNeeded());
+        // recommendationRequest.setDone(incoming.getDone());
+
+        recommendationrequestRepository.save(recommendationRequest);
+
+        return recommendationRequest;
     }
 }
