@@ -27,7 +27,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
 
-
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
@@ -100,20 +99,48 @@ public class RecommendationRequestController extends ApiController {
     }
 
     /**
-     * Get a single date by id
+     * Get a single recommendation request by id
      * 
-     * @param id the id of the date
-     * @return a UCSBDate
+     * @param id the id of the recommendation request
+     * @return a RecommendationRequest
      */
-    @Operation(summary= "Get a single date")
+    @Operation(summary = "Get a single recommendation request")
     @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping("")
     public RecommendationRequest getById(
-            @Parameter(name="id") @RequestParam Long id) {
+            @Parameter(name = "id") @RequestParam Long id) {
         RecommendationRequest recommendationRequest = recommendationrequestRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(RecommendationRequest.class, id));
 
         return recommendationRequest;
     }
 
+    /**
+     * Update a single date
+     * 
+     * @param id       id of the recommendation request to update
+     * @param incoming the new recommendation request
+     * @return the updated recommendation request object
+     */
+    @Operation(summary = "Update a single recommendation request")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PutMapping("")
+    public RecommendationRequest updateRecommendationRequest(
+            @Parameter(name = "id") @RequestParam Long id,
+            @RequestBody @Valid RecommendationRequest incoming) {
+
+        RecommendationRequest recommendationRequest = recommendationrequestRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(RecommendationRequest.class, id));
+
+        recommendationRequest.setProfessorEmail(incoming.getProfessorEmail());
+        recommendationRequest.setRequesterEmail(incoming.getRequesterEmail());
+        recommendationRequest.setExplanation(incoming.getExplanation());
+        recommendationRequest.setDateRequested(incoming.getDateRequested());
+        recommendationRequest.setDateNeeded(incoming.getDateNeeded());
+        recommendationRequest.setDone(incoming.getDone());
+
+        recommendationrequestRepository.save(recommendationRequest);
+
+        return recommendationRequest;
+    }
 }
