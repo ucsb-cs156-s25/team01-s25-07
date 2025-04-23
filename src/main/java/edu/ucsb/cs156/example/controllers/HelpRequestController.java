@@ -59,7 +59,7 @@ import java.time.LocalDateTime;
      * 
      * @param requesterEmail       the email in typical email format
      * @param teamID               the number of the team
-     * @param tableIrBreakoutRoom  the table/room the help requster is at
+     * @param tableOrBreakoutRoom  the table/room the help requster is at
      * @param explanation          the explanation of the problem
      * @param solved               the solved status of the request
      * @param localDateTime        the date of the request
