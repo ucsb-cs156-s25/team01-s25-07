@@ -1,0 +1,81 @@
+{
+    "databaseChangeLog": [
+      {
+        "changeSet": {
+          "id": "RecommendationRequest-1",
+          "author": "stevenliu2002",
+          "preConditions": [
+            {
+              "onFail": "MARK_RAN"
+            },
+            {
+              "not": [
+                {
+                  "tableExists": {
+                    "tableName": "recommendationrequest"
+                  }
+                }
+              ]
+            }
+          ],
+          "changes": [
+            {
+              "createTable": {
+                "columns": [
+                  {
+                    "column": {
+                      "autoIncrement": true,
+                      "constraints": {
+                        "primaryKey": true,
+                        "primaryKeyName": "RECOMMENDATIONREQUEST_PK"
+                      },
+                      "name": "id",
+                      "type": "BIGINT"
+                    }
+                  },
+                  {
+                    "column": {
+                      "name": "requester_email",
+                      "type": "VARCHAR(255)"
+                    }
+                  },
+                  {
+                    "column": {
+                      "name": "professor_email",
+                      "type": "VARCHAR(255)"
+                    }
+                  },
+                  {
+                    "column": {
+                      "name": "explanation",
+                      "type": "VARCHAR(255)"
+                    }
+                  },
+                  {
+                    "column": {
+                      "name": "date_requested",
+                      "type": "TIMESTAMP"
+                    }
+                  },
+                  {
+                    "column": {
+                      "name": "date_needed",
+                      "type": "TIMESTAMP"
+                    }
+                  },
+                  {
+                    "column": {
+                      "name": "done",
+                      "type": "BOOLEAN",
+                      "defaultValueBoolean": false
+                    }
+                  }
+                ],
+                "tableName": "recommendationrequest"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
