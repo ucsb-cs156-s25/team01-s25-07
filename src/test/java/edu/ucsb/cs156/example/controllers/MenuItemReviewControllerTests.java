@@ -49,27 +49,27 @@ public class MenuItemReviewControllerTests extends ControllerTestCase{
 
     @Test
     public void logged_out_users_cannot_get_all() throws Exception {
-            mockMvc.perform(get("/api/menuitemreviews/all"))
+            mockMvc.perform(get("/api/menuitemreview/all"))
                             .andExpect(status().is(403)); // logged out users can't get all
     }
 
     @WithMockUser(roles = { "USER" })
     @Test
     public void logged_in_users_can_get_all() throws Exception {
-            mockMvc.perform(get("/api/menuitemreviews/all"))
+            mockMvc.perform(get("/api/menuitemreview/all"))
                             .andExpect(status().is(200)); // logged
     }
 
     @Test
     public void logged_out_users_cannot_post() throws Exception {
-            mockMvc.perform(post("/api/menuitemreviews/post"))
+            mockMvc.perform(post("/api/menuitemreview/post"))
                             .andExpect(status().is(403));
     }
 
     @WithMockUser(roles = { "USER" })
     @Test
     public void logged_in_regular_users_cannot_post() throws Exception {
-            mockMvc.perform(post("/api/menuitemreviews/post"))
+            mockMvc.perform(post("/api/menuitemreview/post"))
                             .andExpect(status().is(403)); // only admins can post
     }
 
@@ -91,7 +91,7 @@ public class MenuItemReviewControllerTests extends ControllerTestCase{
             when(MenuItemReviewRepository.findAll()).thenReturn(expectedMIRs);
 
             // act
-            MvcResult response = mockMvc.perform(get("/api/menuitemreviews/all"))
+            MvcResult response = mockMvc.perform(get("/api/menuitemreview/all"))
                             .andExpect(status().isOk()).andReturn();
 
             // assert
@@ -117,7 +117,7 @@ public class MenuItemReviewControllerTests extends ControllerTestCase{
 
             // act
             MvcResult response = mockMvc.perform(
-                            post("/api/menuitemreviews/post?itemId=1&reviewerEmail=yy@ucsb.edu&stars=5&comments=Great food!")
+                            post("/api/menuitemreview/post?itemId=1&reviewerEmail=yy@ucsb.edu&stars=5&comments=Great food!")
                                             .with(csrf()))
                             .andExpect(status().isOk()).andReturn();
 
