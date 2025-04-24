@@ -62,7 +62,7 @@ public class UCSBOrganizationControllerTests extends ControllerTestCase {
                                 .andExpect(status().is(403)); // logged out users can't get by id
         }
 
-        // Authorization tests for /api/ucsbdiningcommons/post
+        // Authorization tests for /api/ucsborganizations/post
         // (Perhaps should also have these for put and delete)
 
         @Test

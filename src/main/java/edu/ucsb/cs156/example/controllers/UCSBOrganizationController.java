@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 import jakarta.validation.Valid;
 
 /**
- * This is a REST controller for UCSBDiningCommons
+ * This is a REST controller for UCSBOrganization
  */
 
 @Tag(name = "UCSBOrganization")
