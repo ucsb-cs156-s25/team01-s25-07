@@ -55,6 +55,23 @@ import java.time.LocalDateTime;
     }
 
     /**
+     * Get a single request by id
+     * 
+     * @param id the id of the date
+     * @return a HelpRequest
+     */
+    @Operation(summary= "Get a single help request")
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping("")
+    public HelpRequest getById(
+            @Parameter(name="id") @RequestParam Long id) {
+        HelpRequest helpRequest = helpRequestRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(HelpRequest.class, id));
+
+        return helpRequest;
+    }
+
+    /**
      * Create a new help request
      * 
      * @param requesterEmail       the email in typical email format
