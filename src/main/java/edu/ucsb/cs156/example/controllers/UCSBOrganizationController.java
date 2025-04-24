@@ -49,6 +49,22 @@ public class UCSBOrganizationController extends ApiController {
     }
 
     /**
+     * This method returns a single organization.
+     * @param orgCode code of the organization
+     * @return a single organization
+     */
+    @Operation(summary= "Get a single organization")
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping("")
+    public UCSBOrganization getById(
+            @Parameter(name="orgCode") @RequestParam String orgCode) {
+        UCSBOrganization organization = ucsbOrganizationRepository.findById(orgCode)
+                .orElseThrow(() -> new EntityNotFoundException(UCSBOrganization.class, orgCode));
+
+        return organization;
+    }
+
+    /**
      * This method creates a new organization. Accessible only to users with the role "ROLE_ADMIN".
      * @param orgCode code of the organization
      * @param orgTranslationShort shortened name of the organization
@@ -78,19 +94,20 @@ public class UCSBOrganizationController extends ApiController {
     }
 
     /**
-     * This method returns a single organization.
+     * Delete an organization. Accessible only to users with the role "ROLE_ADMIN".
      * @param orgCode code of the organization
-     * @return a single organization
+     * @return a message indiciating the organization was deleted
      */
-    @Operation(summary= "Get a single organization")
-    @PreAuthorize("hasRole('ROLE_USER')")
-    @GetMapping("")
-    public UCSBOrganization getById(
+    @Operation(summary= "Delete a UCSBOrganization")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @DeleteMapping("")
+    public Object deleteCommons(
             @Parameter(name="orgCode") @RequestParam String orgCode) {
         UCSBOrganization organization = ucsbOrganizationRepository.findById(orgCode)
                 .orElseThrow(() -> new EntityNotFoundException(UCSBOrganization.class, orgCode));
 
-        return organization;
+        ucsbOrganizationRepository.delete(organization);
+        return genericMessage("UCSBOrganization with id %s deleted".formatted(orgCode));
     }
 
     /**
