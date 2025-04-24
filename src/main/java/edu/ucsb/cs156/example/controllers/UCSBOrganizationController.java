@@ -78,9 +78,9 @@ public class UCSBOrganizationController extends ApiController {
     }
 
     /**
-     * This method returns a single diningcommons.
-     * @param orgCode code of the diningcommons
-     * @return a single diningcommons
+     * This method returns a single organization.
+     * @param orgCode code of the organization
+     * @return a single organization
      */
     @Operation(summary= "Get a single organization")
     @PreAuthorize("hasRole('ROLE_USER')")
@@ -92,4 +92,31 @@ public class UCSBOrganizationController extends ApiController {
 
         return organization;
     }
+
+    /**
+     * Update a single organization. Accessible only to users with the role "ROLE_ADMIN".
+     * @param orgCode code of the organization
+     * @param incoming the new organization contents
+     * @return the updated organization object
+     */
+    @Operation(summary= "Update a single organization")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PutMapping("")
+    public UCSBOrganization updateOrganization(
+            @Parameter(name="orgCode") @RequestParam String orgCode,
+            @RequestBody @Valid UCSBOrganization incoming) {
+
+        UCSBOrganization organization = ucsbOrganizationRepository.findById(orgCode)
+                .orElseThrow(() -> new EntityNotFoundException(UCSBOrganization.class, orgCode));
+
+        organization.setOrgTranslationShort(incoming.getOrgTranslationShort());
+        organization.setOrgTranslation(incoming.getOrgTranslation());
+        organization.setInactive(incoming.getInactive());
+
+        ucsbOrganizationRepository.save(organization);
+
+        return organization;
+    }
+
+
 }
