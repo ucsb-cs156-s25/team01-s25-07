@@ -55,6 +55,23 @@ import java.time.LocalDateTime;
     }
 
     /**
+     * Get a single request by id
+     * 
+     * @param id the id of the date
+     * @return a HelpRequest
+     */
+    @Operation(summary= "Get a single help request")
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping("")
+    public HelpRequest getById(
+            @Parameter(name="id") @RequestParam Long id) {
+        HelpRequest helpRequest = helpRequestRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(HelpRequest.class, id));
+
+        return helpRequest;
+    }
+
+    /**
      * Create a new help request
      * 
      * @param requesterEmail       the email in typical email format
@@ -93,5 +110,23 @@ import java.time.LocalDateTime;
         HelpRequest savedHelpRequest = helpRequestRepository.save(helpRequest);
 
         return savedHelpRequest;
+    }
+
+    /**
+     * Delete a HelpRequest
+     * 
+     * @param id the id of the helprequest to delete
+     * @return a message indicating the helprequest was deleted
+     */
+    @Operation(summary= "Delete a HelpRequest")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @DeleteMapping("")
+    public Object deleteHelpRequest(
+            @Parameter(name="id") @RequestParam Long id) {
+        HelpRequest helpRequest = helpRequestRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(HelpRequest.class, id));
+
+        helpRequestRepository.delete(helpRequest);
+        return genericMessage("HelpRequest with id %s deleted".formatted(id));
     }
 }
