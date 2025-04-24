@@ -116,7 +116,7 @@ import java.util.Optional;
     }
 
     /**
-     * Update a single date
+     * Update a single recommendation request
      * 
      * @param id       id of the recommendation request to update
      * @param incoming the new recommendation request
@@ -142,6 +142,24 @@ import java.util.Optional;
 <span class="fc" id="L142">        recommendationrequestRepository.save(recommendationRequest);</span>
 
 <span class="fc" id="L144">        return recommendationRequest;</span>
+    }
+
+    /**
+     * Delete a recommendation request
+     * 
+     * @param id the id of the recommendation request to delete
+     * @return a message indicating the recommendation request was deleted
+     */
+    @Operation(summary = &quot;Delete a RecommendationRequest&quot;)
+    @PreAuthorize(&quot;hasRole('ROLE_ADMIN')&quot;)
+    @DeleteMapping(&quot;&quot;)
+    public Object deleteUCSBDate(
+            @Parameter(name = &quot;id&quot;) @RequestParam Long id) {
+<span class="fc" id="L158">        RecommendationRequest recommendationRequest = recommendationrequestRepository.findById(id)</span>
+<span class="fc" id="L159">                .orElseThrow(() -&gt; new EntityNotFoundException(RecommendationRequest.class, id));</span>
+
+<span class="fc" id="L161">        recommendationrequestRepository.delete(recommendationRequest);</span>
+<span class="fc" id="L162">        return genericMessage(&quot;RecommendationRequest with id %s deleted&quot;.formatted(id));</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
