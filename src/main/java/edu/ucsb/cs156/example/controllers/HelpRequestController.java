@@ -1,6 +1,7 @@
 package edu.ucsb.cs156.example.controllers;
 
 import edu.ucsb.cs156.example.entities.HelpRequest;
+import edu.ucsb.cs156.example.entities.UCSBDate;
 import edu.ucsb.cs156.example.errors.EntityNotFoundException;
 import edu.ucsb.cs156.example.repositories.HelpRequestRepository;
 
@@ -52,6 +53,23 @@ import java.time.LocalDateTime;
     public Iterable<HelpRequest> allHelpRequests() {
         Iterable<HelpRequest> requests = helpRequestRepository.findAll();
         return requests;
+    }
+
+    /**
+     * Get a single request by id
+     * 
+     * @param id the id of the date
+     * @return a HelpRequest
+     */
+    @Operation(summary= "Get a single help request")
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping("")
+    public HelpRequest getById(
+            @Parameter(name="id") @RequestParam Long id) {
+        HelpRequest helpRequest = helpRequestRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(HelpRequest.class, id));
+
+        return helpRequest;
     }
 
     /**
