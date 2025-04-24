@@ -129,4 +129,33 @@ import java.time.LocalDateTime;
         helpRequestRepository.delete(helpRequest);
         return genericMessage("HelpRequest with id %s deleted".formatted(id));
     }
+
+    /**
+     * Update a single request
+     * 
+     * @param id       id of the helprequest to update
+     * @param incoming the new helprequest
+     * @return the updated helprequest object
+     */
+    @Operation(summary= "Update a single helprequest")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PutMapping("")
+    public HelpRequest updateHelpRequest(
+            @Parameter(name="id") @RequestParam Long id,
+            @RequestBody @Valid HelpRequest incoming) {
+
+        HelpRequest helpRequest = helpRequestRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(HelpRequest.class, id));
+
+        helpRequest.setRequesterEmail(incoming.getRequesterEmail());
+        helpRequest.setExplanation(incoming.getExplanation());
+        helpRequest.setSolved(incoming.getSolved());
+        helpRequest.setTableOrBreakoutRoom(incoming.getTableOrBreakoutRoom());
+        helpRequest.setTeamID(incoming.getTeamID());
+        helpRequest.setLocalDateTime(incoming.getLocalDateTime());
+
+        helpRequestRepository.save(helpRequest);
+
+        return helpRequest;
+    }
 }
