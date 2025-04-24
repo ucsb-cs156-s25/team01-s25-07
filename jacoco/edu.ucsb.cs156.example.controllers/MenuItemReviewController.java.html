@@ -13,6 +13,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -26,8 +27,8 @@ import jakarta.validation.Valid;
 @Tag(name = &quot;MenuItemReview&quot;)
 @RequestMapping(&quot;/api/menuitemreview&quot;)
 @RestController
-<span class="fc" id="L29">@Slf4j</span>
-<span class="fc" id="L30">public class MenuItemReviewController extends ApiController {</span>
+<span class="fc" id="L30">@Slf4j</span>
+<span class="fc" id="L31">public class MenuItemReviewController extends ApiController {</span>
 
     @Autowired
     MenuItemReviewRepository menuItemReviewRepository;
@@ -41,8 +42,8 @@ import jakarta.validation.Valid;
     @PreAuthorize(&quot;hasRole('ROLE_USER')&quot;)
     @GetMapping(&quot;/all&quot;)
     public Iterable&lt;MenuItemReview&gt; allMIRs() {
-<span class="fc" id="L44">        Iterable&lt;MenuItemReview&gt; mirs = menuItemReviewRepository.findAll();</span>
-<span class="fc" id="L45">        return mirs;</span>
+<span class="fc" id="L45">        Iterable&lt;MenuItemReview&gt; mirs = menuItemReviewRepository.findAll();</span>
+<span class="fc" id="L46">        return mirs;</span>
     }
 
     /**
@@ -64,13 +65,13 @@ import jakarta.validation.Valid;
             @Parameter(name = &quot;comments&quot;) @RequestParam String comments)
             throws JsonProcessingException {
 
-<span class="fc" id="L67">        MenuItemReview mir = new MenuItemReview();</span>
-<span class="fc" id="L68">        mir.setItemId(itemId);</span>
-<span class="fc" id="L69">        mir.setReviewerEmail(reviewerEmail);</span>
-<span class="fc" id="L70">        mir.setStars(stars);</span>
-<span class="fc" id="L71">        mir.setComments(comments);</span>
-<span class="fc" id="L72">        MenuItemReview savedMIR = menuItemReviewRepository.save(mir);</span>
-<span class="fc" id="L73">        return savedMIR;</span>
+<span class="fc" id="L68">        MenuItemReview mir = new MenuItemReview();</span>
+<span class="fc" id="L69">        mir.setItemId(itemId);</span>
+<span class="fc" id="L70">        mir.setReviewerEmail(reviewerEmail);</span>
+<span class="fc" id="L71">        mir.setStars(stars);</span>
+<span class="fc" id="L72">        mir.setComments(comments);</span>
+<span class="fc" id="L73">        MenuItemReview savedMIR = menuItemReviewRepository.save(mir);</span>
+<span class="fc" id="L74">        return savedMIR;</span>
     }
 
     @Operation(summary = &quot;Get a single MenuItemReview by id&quot;)
@@ -78,9 +79,9 @@ import jakarta.validation.Valid;
     @GetMapping(&quot;&quot;)
     public MenuItemReview getById(
             @Parameter(name = &quot;id&quot;) @RequestParam Long id) {
-<span class="fc" id="L81">        MenuItemReview mir = menuItemReviewRepository.findById(id)</span>
-<span class="fc" id="L82">                .orElseThrow(() -&gt; new EntityNotFoundException(MenuItemReview.class, id));</span>
-<span class="fc" id="L83">        return mir;</span>
+<span class="fc" id="L82">        MenuItemReview mir = menuItemReviewRepository.findById(id)</span>
+<span class="fc" id="L83">                .orElseThrow(() -&gt; new EntityNotFoundException(MenuItemReview.class, id));</span>
+<span class="fc" id="L84">        return mir;</span>
     }
 
     @Operation(summary = &quot;Update a single MenuItemReview&quot;)
@@ -90,17 +91,29 @@ import jakarta.validation.Valid;
             @Parameter(name = &quot;id&quot;) @RequestParam Long id,
             @RequestBody @Valid MenuItemReview incoming) {
 
-<span class="fc" id="L93">        MenuItemReview mir = menuItemReviewRepository.findById(id)</span>
-<span class="fc" id="L94">                .orElseThrow(() -&gt; new EntityNotFoundException(MenuItemReview.class, id));</span>
+<span class="fc" id="L94">        MenuItemReview mir = menuItemReviewRepository.findById(id)</span>
+<span class="fc" id="L95">                .orElseThrow(() -&gt; new EntityNotFoundException(MenuItemReview.class, id));</span>
 
-<span class="fc" id="L96">        mir.setItemId(incoming.getItemId());</span>
-<span class="fc" id="L97">        mir.setReviewerEmail(incoming.getReviewerEmail());</span>
-<span class="fc" id="L98">        mir.setStars(incoming.getStars());</span>
-<span class="fc" id="L99">        mir.setComments(incoming.getComments());</span>
+<span class="fc" id="L97">        mir.setItemId(incoming.getItemId());</span>
+<span class="fc" id="L98">        mir.setReviewerEmail(incoming.getReviewerEmail());</span>
+<span class="fc" id="L99">        mir.setStars(incoming.getStars());</span>
+<span class="fc" id="L100">        mir.setComments(incoming.getComments());</span>
 
-<span class="fc" id="L101">        menuItemReviewRepository.save(mir);</span>
+<span class="fc" id="L102">        menuItemReviewRepository.save(mir);</span>
 
-<span class="fc" id="L103">        return mir;</span>
+<span class="fc" id="L104">        return mir;</span>
+    }
+
+    @Operation(summary= &quot;Delete a MenuItemReview&quot;)
+    @PreAuthorize(&quot;hasRole('ROLE_ADMIN')&quot;)
+    @DeleteMapping(&quot;&quot;)
+    public Object deleteMIR(
+            @Parameter(name=&quot;id&quot;) @RequestParam Long id) {
+<span class="fc" id="L112">                MenuItemReview mir = menuItemReviewRepository.findById(id)</span>
+<span class="fc" id="L113">                .orElseThrow(() -&gt; new EntityNotFoundException(MenuItemReview.class, id));</span>
+
+<span class="fc" id="L115">        menuItemReviewRepository.delete(mir);</span>
+<span class="fc" id="L116">        return genericMessage(&quot;MenuItemReview with id %s deleted&quot;.formatted(id));</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
