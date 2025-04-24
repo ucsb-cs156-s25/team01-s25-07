@@ -4,9 +4,7 @@ import edu.ucsb.cs156.example.repositories.UserRepository;
 import edu.ucsb.cs156.example.testconfig.TestConfig;
 import edu.ucsb.cs156.example.ControllerTestCase;
 import edu.ucsb.cs156.example.entities.HelpRequest;
-import edu.ucsb.cs156.example.entities.UCSBDate;
 import edu.ucsb.cs156.example.repositories.HelpRequestRepository;
-import edu.ucsb.cs156.example.repositories.UCSBDateRepository;
 
 import java.util.ArrayList;
 import java.util.Arrays;
